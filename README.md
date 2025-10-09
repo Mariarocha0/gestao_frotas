@@ -47,12 +47,13 @@ cp .env.example .env
 
 # Criar tabelas e iniciar Prisma
 npx prisma migrate dev --name init
+```
 
 ---
 
-
 ## 🎯 Objetivo
 Este projeto é parte do estágio em Engenharia de Software, com o objetivo de aplicar práticas reais de desenvolvimento full-stack, integração contínua e boas práticas de arquitetura.
+---
 
 ## 👩‍💻 Autora
 Maria Luiza Ribeiro Rocha (eu)
