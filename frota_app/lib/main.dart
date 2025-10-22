@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
-import 'features/auth/presentation/login_screen.dart';
+import 'modules/login/login_modules.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const FrotaApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class FrotaApp extends StatelessWidget {
+  const FrotaApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Gestão de Frotas',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
-      home: const LoginScreen(),
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: LoginModule.build(),
     );
   }
 }
