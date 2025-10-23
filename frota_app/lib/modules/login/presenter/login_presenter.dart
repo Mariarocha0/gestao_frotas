@@ -2,10 +2,21 @@ import '../interactor/login_interactor.dart';
 
 class LoginPresenter {
   final LoginInteractor interactor;
+  final Function(String) onError;
+  final Function(Map<String, dynamic>) onSuccess;
 
-  LoginPresenter(this.interactor);
+  LoginPresenter({
+    required this.interactor,
+    required this.onError,
+    required this.onSuccess,
+  });
 
-  void login(String email, String password) {
-    interactor.authenticate(email, password);
+  Future<void> login(String email, String password) async {
+    try {
+      final result = await interactor.login(email, password);
+      onSuccess(result);
+    } catch (e) {
+      onError(e.toString());
+    }
   }
 }
