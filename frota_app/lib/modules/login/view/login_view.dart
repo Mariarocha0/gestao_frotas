@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:frota_app/services/api_services.dart';
 import '../presenter/login_presenter.dart';
 import '../router/login_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 
 class LoginView extends StatefulWidget {
   final LoginPresenter presenter;
@@ -15,6 +18,7 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final ApiService apiService = ApiService(); 
   bool carregando = false;
   bool mostrarSenha = false;
 
@@ -119,8 +123,25 @@ class _LoginViewState extends State<LoginView> {
                             );
 
                             try {
-                              await widget.presenter.login(email, senha);
-                              widget.router.irParaDashboard(context);
+                              final result = await apiService.login(email, senha);
+                              print(result);
+
+                              if (result["success"]) {
+                               final prefs = await SharedPreferences.getInstance();
+                                await prefs.setString('token', result["data"]["token"]);
+
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("Login bem-sucedido!")),
+                                );
+
+                                widget.router.irParaDashboard(context);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                      content: Text(
+                                          result["message"] ?? "Erro no login")),
+                                );
+                              }
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text("Erro: $e")),
