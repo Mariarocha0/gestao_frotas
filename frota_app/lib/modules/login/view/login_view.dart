@@ -4,7 +4,6 @@ import '../presenter/login_presenter.dart';
 import '../router/login_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class LoginView extends StatefulWidget {
   final LoginPresenter presenter;
   final LoginRouter router;
@@ -18,7 +17,7 @@ class LoginView extends StatefulWidget {
 class _LoginViewState extends State<LoginView> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final ApiService apiService = ApiService(); 
+  final ApiService apiService = ApiService();
   bool carregando = false;
   bool mostrarSenha = false;
 
@@ -109,7 +108,8 @@ class _LoginViewState extends State<LoginView> {
                             if (email.isEmpty || senha.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text("Preencha todos os campos!")),
+                                  content: Text("Preencha todos os campos!"),
+                                ),
                               );
                               return;
                             }
@@ -118,31 +118,47 @@ class _LoginViewState extends State<LoginView> {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text("Fazendo login..."),
-                                duration: Duration(seconds: 2),
+                                duration: Duration(seconds: 1),
                               ),
                             );
 
                             try {
                               final result = await apiService.login(email, senha);
-                              print(result);
+                              print('📩 Resposta recebida: $result');
 
-                              if (result["success"]) {
-                               final prefs = await SharedPreferences.getInstance();
-                                await prefs.setString('token', result["data"]["token"]);
+                              if (result.isNotEmpty) {
+                                final prefs = await SharedPreferences.getInstance();
 
+                                // Detecta formato com ou sem "data"
+                                final data = result["data"] ?? result;
+                                final userData = data["user"];
+                                final token = data["token"];
+
+                                // Corrige campo de nome (name/nome)
+                                final nome = userData["name"] ??
+                                    userData["nome"] ??
+                                    "Usuário";
+
+                                // Salva tudo com segurança
+                                await prefs.setString('token', token);
+                                await prefs.setString('nome', nome);
+                                await prefs.setString('role', userData["role"]);
+
+                                print('✅ Login bem-sucedido: $nome (${userData["role"]})');
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("Login bem-sucedido!")),
+                                  SnackBar(content: Text("Bem-vindo, $nome!")),
                                 );
 
                                 widget.router.irParaDashboard(context);
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                      content: Text(
-                                          result["message"] ?? "Erro no login")),
+                                  const SnackBar(
+                                    content: Text("Falha no login, tente novamente."),
+                                  ),
                                 );
                               }
                             } catch (e) {
+                              print('❌ Erro no login: $e');
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text("Erro: $e")),
                               );
